@@ -17,27 +17,34 @@ class BukuController extends Controller
      */
     public function index()
     {
-        $active_menu = 'data_buku';
-        return response()->json([
-            'active_menu' => $active_menu
-        ], 200);
+        //
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function get() //category hehe :D
+    public function create()
     {
-        return response()->json([
-            KatBuku::all()
-        ], 200);
+        /*=====[Mengambil semua data buku====*/
+        try {
+            $buku = Buku::with('kategori_buku')->get();
+            return response()->json([
+                'data' => $buku
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function storeData(BukuRequest $request)
+    public function store(BukuRequest $request)
     {
+        /*=====[Menyimpan data buku]====*/
         try {
             $requestData = $request->validated();
             $file_buku = $request->file_buku->store('buku');
@@ -63,19 +70,23 @@ class BukuController extends Controller
     }
 
     /**
-     * Mengambil semua data buku
+     * Display the specified resource.
      */
-    public function getData()
+    public function show($buku)
     {
+        /*=====[Menampilkan data buku, berdasarkan id buku]=====*/
         try {
-            $buku = Buku::with('kategori_buku')->get();
+            $buku = Buku::with('kategori_buku')->findOrFail($buku);
             return response()->json([
+                'error' => false,
+                'message' => 'Data Buku',
                 'data' => $buku
-            ], 200);
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => true,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'id' => $buku
             ]);
         }
     }

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Buku;
 use App\Models\KatBuku;
 use Illuminate\Http\Request;
 
@@ -20,7 +20,20 @@ class KatBukuController extends Controller
      */
     public function create()
     {
-        //
+        /*=====[Mengambil semua data kategori buku]=====*/
+        try {
+            $kat_buku = KatBuku::all();
+            return response()->json([
+                'error' => false,
+                'message' => 'Data Kategori Buku',
+                'data' => $kat_buku
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -36,7 +49,20 @@ class KatBukuController extends Controller
      */
     public function show(KatBuku $katBuku)
     {
-        //
+        /*=====[Mengambil data buku berdasarkan kategori buku]=====*/
+        try {
+            $buku = Buku::with('kategori_buku')->findOrFail($katBuku->id_kat_buku)->get();
+            return response()->json([
+                'error' => false,
+                'message' => 'Data Buku',
+                'data' => $buku
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
