@@ -15,9 +15,10 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-Route::group([], function() {
 
-    Route::prefix('kategori-buku')->controller(KatBukuController::class)->name('katbuku.')->group(function() {
+Route::group([], function () {
+
+    Route::prefix('kategori-buku')->controller(KatBukuController::class)->name('katbuku.')->group(function () {
         Route::get('/', 'create')->name('getData'); //get all data
         Route::get('{id}', 'show')->name('show'); //get data by category id
         //Route::post('store', 'store')->name('store'); //post data (create data)
@@ -30,13 +31,19 @@ Route::group([], function() {
     // Route::get('katalog-buku/{id}', [BukuController::class, 'show'])->name('buku.show'); //get data by category id
 
 
-    Route::prefix('buku')->controller(BukuController::class)->name('buku.')->group(function() {
+    Route::prefix('buku')->controller(BukuController::class)->name('buku.')->group(function () {
+
+        Route::get('list', 'list')->name('getData'); //yajra datatables
         Route::get('/', 'create')->name('getData'); //get all data
         Route::get('{id}', 'show')->name('show'); //get data by category id
         Route::post('store', 'store')->name('store'); //post data (create data)
         Route::put('update/{id}', 'update')->name('update'); //update data
         Route::delete('delete/{id}', 'destroy')->name('destroy'); //delete data
     });
+
+    // Route::prefix('bangkes')->name('bangkes.')->group(function () {
+    //     Route::resource('buku', BukuController::class);
+    // });
 
     // sama aja :)
     // Route::get('buku', [BukuController::class, 'create'])->name('buku.getData'); //get all data

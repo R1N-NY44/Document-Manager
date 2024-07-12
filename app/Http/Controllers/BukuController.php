@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Spatie\PdfToImage\Pdf;
 use App\Http\Requests\BukuRequest;
 use Illuminate\Support\Facades\Storage;
-
+use Yajra\DataTables\Facades\DataTables;
 
 class BukuController extends Controller
 {
@@ -19,6 +19,22 @@ class BukuController extends Controller
     {
         //
     }
+
+
+    public function list()
+    {
+        $buku = Buku::with('kategori_buku')->latest()->get();
+        return DataTables::of($buku)
+            ->addColumn('file_buku', function ($row) {
+                return "<div class='text-center'><a href='" . asset('storage/' . $row->file_buku) . "'><u><i data-feather='paperclip' class='mr-50'></i>Lihat Dokumen</u></a></div>";
+            })
+            ->addColumn('action', function ($row) {
+                return "<div class='text-center'><a href='" . route('buku.store', $row->id_buku) . "'><button title='Edit' class='btn text-primary p-0 pr-50'><i data-feather='edit' class='font-medium-4'></i></button></a><button title='Delete' type='button' class='delete-data btn p-0' data-id='" . $row->id_buku . "' data-url='" . url('bangkes/buku') . "'><i data-feather='trash' class='font-medium-4 text-danger'></i></button></div>";
+            })
+            ->rawColumns(['file_buku', 'action'])
+            ->toJson();
+    }
+
 
     /**
      * Show the form for creating a new resource.
@@ -44,15 +60,19 @@ class BukuController extends Controller
      */
     public function store(BukuRequest $request)
     {
-        /*=====[Menyimpan data buku]====*/
         try {
             $requestData = $request->validated();
-            $file_buku = $request->file_buku->store('buku');
-            $requestData['file_buku'] = $file_buku;
 
-            $buku_path = Storage::path($file_buku);
-            $pdf = new Pdf($buku_path);
-            $pdf->saveImage(public_path('cover_buku') . '/' . basename($file_buku) . '.jpeg');
+            // Proses file yang diunggah
+            if ($request->hasFile('file_buku')) {
+                $file_buku = $request->file('file_buku')->store('buku');
+                $requestData['file_buku'] = $file_buku;
+
+                // Proses cover buku (misalnya, membuat thumbnail)
+                $buku_path = Storage::path($file_buku);
+                $pdf = new Pdf($buku_path);
+                $pdf->saveImage(public_path('cover_buku') . '/' . basename($file_buku) . '.jpeg');
+            }
 
             Buku::create($requestData);
 
@@ -68,6 +88,33 @@ class BukuController extends Controller
             ]);
         }
     }
+
+    // public function store(BukuRequest $request)
+    // {
+    //     /*=====[Menyimpan data buku]====*/
+    //     try {
+    //         $requestData = $request->validated();
+    //         $file_buku = $request->file_buku->store('buku');
+    //         $requestData['file_buku'] = $file_buku;
+
+    //         $buku_path = Storage::path($file_buku);
+    //         $pdf = new Pdf($buku_path);
+    //         $pdf->saveImage(public_path('cover_buku') . '/' . basename($file_buku) . '.jpeg');
+
+    //         Buku::create($requestData);
+
+    //         return response()->json([
+    //             'error' => false,
+    //             'message' => 'Buku Created!',
+    //             'url' => url('bangkes/buku')
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'error' => true,
+    //             'message' => $e->getMessage()
+    //         ]);
+    //     }
+    // }
 
     /**
      * Display the specified resource.
